@@ -1,0 +1,150 @@
+
+# coding: utf-8
+
+# In[1]:
+
+#variable==> container for storing value
+a = 10
+b = 10
+c = (a+b) * (a-b)
+print(c)
+
+
+# In[3]:
+
+first_value = 10
+second_value = 20
+print(first_value + second_value)
+
+
+# In[4]:
+
+#variable==> container for storing value
+#starts with will not be execuated
+a = 10
+b = 20
+c = (a+b) * (a-b)
+print(c)
+
+
+# In[29]:
+
+Operators 
+#arithmetic oper
+#logic oper
+#assignment oper
+
+import math
+n = 10
+m = 20
+'''
+#This function is explaining multi line comment topic
+'''
+def factorial_calc(n, m):
+    return math.factorial(n) + math.math.factorial(m)
+print(n+m) 
+
+
+# In[8]:
+
+#data types ==> type of data
+#true and false ==> booleen
+
+a = 10
+b = 20.009
+c = True
+d = "python"
+e = "h"
+f = False
+h = "10.999"
+
+print(a)
+print(type(a))
+print(b)
+print(type(c))
+print(c)
+print(type(c))
+print(d)
+print(type(d))
+print(e)
+print(type(e))
+print(f)
+print(type(f))
+print(h)
+print(type(h))
+
+
+# In[25]:
+
+#inbuilt fuctions
+radius = 10
+pi = 3.4
+Area = pi * r**2
+print(Area)
+
+
+# In[10]:
+
+#inbuilt fuctions
+r = 10
+pi = 3.4
+Area = pi * r**2
+print(Area)
+
+
+# In[11]:
+
+#inbuilt fuctions
+radius = 10
+pi = 3.4
+Area = pi * r**2
+print(Area)
+print(type(Area))
+
+
+# In[13]:
+
+#create float ===> convert in to int str bool
+a = 10.0001
+print(int(a))
+print(str(a))
+print(bool(a))
+
+
+# In[15]:
+
+#create float ===> convert in to int str bool
+var_float=50.005
+print(int(var_float))
+print(str(var_float))
+print(bool(var_float))
+
+
+# In[16]:
+
+#create int ==> conver in to float str bool
+var_int=1000.5009
+print(float(var_int))
+print(str(var_int))
+print(bool(var_int))
+
+
+# In[18]:
+
+#create bool ===> convert in to float int str
+var_bool=True
+print(float(var_bool))
+print(int(var_bool))
+print(str(var_bool))
+
+
+# In[21]:
+
+#create str ===> convert in to int float bool
+var_str=278.75
+print(int(var_str))
+print(float(var_str))
+print(bool(var_str))
+
+
+# In[ ]:
