@@ -1,0 +1,114 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+__author__ = "christy"
+__version__ = "0.1.0"
+__maintainer__ = "christy"
+__email__ = "test"
+__status__ = "Dev"
+ 
+import json
+import requests
+from http.server import HTTPServer, BaseHTTPRequestHandler
+ 
+ts_token = None
+ 
+ 
+class AlertHandler (BaseHTTPRequestHandler):
+    ts_token = None
+ 
+    def do_POST(self):
+        ts_events = []
+        print("Token: ", self.ts_token)
+        if self.ts_token:
+            print("Token should be defined: ", self.ts_token)
+            if not self.__verify_ts_token(self.ts_token):
+                self.ts_token = self.__get_ts_token()
+        else:
+            self.ts_token = self.__get_ts_token()
+        content_len = int(self.headers["Content-Length"])
+        data = json.loads(self.rfile.read(content_len))
+        print("Received %u %s alerts:" % (len(data["alerts"]), data["status"]))
+        print("\tGrouping labels:")
+        for k, v in data['groupLabels'].items():
+            print("\t\t%s = %r" % (k, v))
+        print("\tCommon labels:")
+        for k, v in data['commonLabels'].items():
+            print("\t\t%s = %r" % (k, v))
+        print("\tCommon annotations:")
+        for k, v in data['commonAnnotations'].items():
+            print("\t\t%s = %r" % (k, v))
+        print("\t\tAlert details:")
+        for idx, alert in enumerate(data['alerts']):
+            print("\t\t\tAlert %u:" % idx)
+            print("\t\t\t\tLabels: %r" % alert['labels'])
+            print("\t\t\t\tAnnotations: %r" % alert['annotations'])
+            event = {
+                "eventSourceHostName": alert['labels']['instance'],
+                "eventSourceIPAddress": "",
+                "attributes": {
+                    "CLASS": "PROMETHEUS",
+                    "mc_object_uri": "",
+                    "severity": alert['labels']['severity'].upper(),
+                    "msg": alert['annotations']['description'],
+                    "mc_object_class": alert['labels']['job'],
+                    "mc_object": alert['labels']['path'],
+                    "mc_parameter": alert['labels']['alertname']
+                    }
+            }
+            ts_events.append(event)
+        print("Events:\n", ts_events)
+        self.send_event_to_ts(ts_events)
+        self.send_response(200)
+        self.end_headers()
+ 
+    @staticmethod
+    def __get_ts_token():
+        user = '<TS User>'
+        password = '<TS User Password>'
+        tenant = '*'
+        url = 'https://<TSPS Server>:<TSPS Port>/tsws/api/v10.1/token'
+        post_data = {
+            "username": user,
+            "password": password,
+            "tenantName": tenant
+            }
+        print(json.dumps(post_data))
+        r = requests.post(url, data=json.dumps(post_data), headers={'Content-Type': 'application/json',
+                                                                    'Accept': 'application/json'}, verify=False)
+        print(r.status_code, r.reason)
+        print(r.json())
+        r_data = json.loads(r.text)
+        print(r_data['response']['authToken'])
+        return r_data['response']['authToken']
+ 
+    @staticmethod
+    def __verify_ts_token(ts_tk):
+        # Function to verify TrueSight authToken
+        print("Verifying TrueSight auth token...")
+        url = 'https://<TSPS Server>:<TSPS Port>/tsws/api/v10.1/token'
+        r = requests.get(url, headers={'Content-Type': 'application/json', 'Accept': 'application/json',
+                                       'authToken': 'authToken ' + ts_tk}, verify=False)
+        print(r.status_code, r.reason)
+        print(r.json())
+        r_data = json.loads(r.text)
+        token_status = r_data['statusMsg']
+        print("Token Status: ", token_status)
+        if token_status == 'OK':
+            return True
+        else:
+            return False
+ 
+    def send_event_to_ts(self, ts_events):
+        url = 'https://<TSIM Server>:<TSIM Server Port>/bppmws/api/Event/create?routingId=pncell_tsim1'
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'authToken ' + self.ts_token
+        }
+        r = requests.post(url, data=json.dumps(ts_events), headers=headers, verify=False)
+        print(r.status_code, r.reason)
+ 
+ 
+if __name__ == '__main__':
+    httpd = HTTPServer(('', 9595), AlertHandler)
+    httpd.serve_forever()
